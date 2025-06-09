@@ -1,0 +1,27 @@
+body {
+    margin: 0;
+    padding: 0;
+    font: arial, sans-serif;
+}
+
+.header {
+    padding:1px;
+    padding-left: 1%;
+    text-align: left;
+    background: lightslategrey;
+    color: white;
+}
+
+.header h1 {
+    font-size: 50px;
+}
+
+.content {
+    padding: 1px 0px;
+    text-align: center;
+    background: lightgrey;
+    border-radius: 15px;
+    margin-left: 20%;
+    margin-right: 20%;
+    margin-top: 20px;
+}
