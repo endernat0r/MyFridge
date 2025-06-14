@@ -17,16 +17,30 @@ function myFunction() {
 // Function to update the display of selected ingredients in the HTML
 function updateSelectedIngredientsDisplay() {
     const selectedItems = document.querySelectorAll('#myMenu li a.selected');
-    const selectedIngredientsSpan = document.getElementById('selectedIngredients');
-    let ingredientsTextArray = [];
+    const selectedIngredientsDiv = document.getElementById('selectedIngredients'); // ID'yi div olarak güncelledik
+    selectedIngredientsDiv.innerHTML = ''; // Önceki içeriği temizle
 
     if (selectedItems.length > 0) {
         selectedItems.forEach(item => {
-            ingredientsTextArray.push(item.textContent); // Get the text of the selected item
+            const ingredientBlock = document.createElement('span');
+            ingredientBlock.textContent = item.textContent; // Seçili öğenin metnini al
+            ingredientBlock.style.display = 'inline-block';
+            ingredientBlock.style.padding = '5px 10px';
+            ingredientBlock.style.margin = '5px';
+            ingredientBlock.style.border = '1px solid #4CAF50';
+            ingredientBlock.style.borderRadius = '15px';
+            ingredientBlock.style.backgroundColor = '#e8f5e9';
+            ingredientBlock.style.color = '#2e7d32';
+            ingredientBlock.style.cursor = 'pointer'; // Tekrar tıklanabilir olduğunu belirtmek için
+            // İsteğe bağlı: bloğa tıklandığında seçimi kaldırma
+            ingredientBlock.onclick = function() {
+                item.classList.remove('selected');
+                updateSelectedIngredientsDisplay();
+            };
+            selectedIngredientsDiv.appendChild(ingredientBlock);
         });
-        selectedIngredientsSpan.textContent = ingredientsTextArray.join(', ');
     } else {
-        selectedIngredientsSpan.textContent = 'None'; // Display 'None' if no items are selected
+        selectedIngredientsDiv.textContent = 'None'; // Display 'None' if no items are selected
     }
 }
 
@@ -46,12 +60,5 @@ document.addEventListener('DOMContentLoaded', function() {
       updateSelectedIngredientsDisplay(); // Update the display of selected ingredients
     });
   });
-
-  // Initialize the display when the page loads.
-  // This ensures the "Your selected ingredients are:" section is correctly populated.
   updateSelectedIngredientsDisplay();
 });
-
-// The old logSelectedItems function is effectively replaced by updateSelectedIngredientsDisplay.
-// If you still need console logging for debugging, you can add console.log statements
-// within updateSelectedIngredientsDisplay or keep a separate logging function.
