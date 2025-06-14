@@ -3,6 +3,16 @@ function myFunction() {
   input = document.getElementById("mySearch");
   filter = input.value.toUpperCase();
   ul = document.getElementById("myMenu");
+
+  // If the search bar is empty, hide the menu and exit the function
+  if (input.value.trim() === "") {
+    ul.style.display = "none";
+    return;
+  } else {
+    // If there is text in the search bar, show the menu
+    ul.style.display = "block"; 
+  }
+
   li = ul.getElementsByTagName("li");
   for (i = 0; i < li.length; i++) {
     a = li[i].getElementsByTagName("a")[0];
@@ -18,12 +28,13 @@ function myFunction() {
 function updateSelectedIngredientsDisplay() {
     const selectedItems = document.querySelectorAll('#myMenu li a.selected');
     const selectedIngredientsDiv = document.getElementById('selectedIngredients');
-    selectedIngredientsDiv.innerHTML = ''; // Delete previous content
+    selectedIngredientsDiv.innerHTML = ''; // Clear previous content
 
     if (selectedItems.length > 0) {
         selectedItems.forEach(item => {
             const ingredientBlock = document.createElement('span');
-            ingredientBlock.textContent = item.textContent;
+            ingredientBlock.textContent = item.textContent; // Get the text of the selected item
+            // Basic style for the block (can also be moved to a CSS file)
             ingredientBlock.style.display = 'inline-block';
             ingredientBlock.style.padding = '5px 10px';
             ingredientBlock.style.margin = '5px';
@@ -31,7 +42,8 @@ function updateSelectedIngredientsDisplay() {
             ingredientBlock.style.borderRadius = '15px';
             ingredientBlock.style.backgroundColor = '#e8f5e9';
             ingredientBlock.style.color = '#2e7d32';
-            ingredientBlock.style.cursor = 'pointer';
+            ingredientBlock.style.cursor = 'pointer'; // To indicate it's clickable again
+            // Optional: remove selection when the block is clicked
             ingredientBlock.onclick = function() {
                 item.classList.remove('selected');
                 updateSelectedIngredientsDisplay();
@@ -39,55 +51,67 @@ function updateSelectedIngredientsDisplay() {
             selectedIngredientsDiv.appendChild(ingredientBlock);
         });
     } else {
-        selectedIngredientsDiv.textContent = 'No ingredients selected';
+        selectedIngredientsDiv.textContent = 'No ingredients selected'; // Display 'No ingredients selected' if no items are selected
     }
 }
 
+// Function to load ingredients from the text file and populate the menu
 async function loadAndPopulateIngredients() {
-    const ingredientsFilePath = '../Data&Data_Extraction/ingredients.txt';
-    const menuUl = document.getElementById('myMenu');
+  const ingredientsFilePath = '../Data&Data_Extraction/ingredients.txt'; // Relative path from script.js to ingredients.txt
+  const menuUl = document.getElementById('myMenu');
 
-    if (!menuUl) {
-        console.error('Hata: myMenu UL elementi bulunamadı.');
-        return;
-    }
+  if (!menuUl) {
+      console.error('Error: myMenu UL element not found.');
+      return;
+  }
 
-    try {
-        const response = await fetch(ingredientsFilePath);
-        if (!response.ok) {
-            throw new Error(`HTTP hatası! Durum: ${response.status}, dosya: ${ingredientsFilePath}`);
-        }
-        const text = await response.text();
-        const ingredients = text.split('\n')
-                                .map(ingredient => ingredient.trim())
-                                .filter(ingredient => ingredient);
+  try {
+      const response = await fetch(ingredientsFilePath);
+      if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}, file: ${ingredientsFilePath}`);
+      }
+      const text = await response.text();
+      const ingredients = text.split('\n')
+                              .map(ingredient => ingredient.trim()) // Remove leading/trailing whitespace
+                              .filter(ingredient => ingredient);   // Remove empty lines
 
-        const menuHTML = ingredients.map(ingredientText => {
-            return `<li><a href="#">${ingredientText.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</a></li>`;
-        }).join('');
-        menuUl.innerHTML = menuHTML;
+      // Create HTML string and populate the menu using innerHTML
+      const menuHTML = ingredients.map(ingredientText => {
+          return `<li><a href="#">${ingredientText.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</a></li>`; // Simple XSS protection
+      }).join('');
+      menuUl.innerHTML = menuHTML;
 
-    } catch (error) {
-        console.error('Malzemeler yüklenirken veya işlenirken hata oluştu:', error);
-        menuUl.innerHTML = '<li><a href="#">Malzemeler yüklenemedi. Lütfen konsolu kontrol edin.</a></li>';
-    }
+  } catch (error) {
+      console.error('Error loading or processing ingredients:', error);
+      menuUl.innerHTML = '<li><a href="#">Could not load ingredients. Please check console.</a></li>';
+  }
 }
 
 document.addEventListener('DOMContentLoaded', async function() {
-  await loadAndPopulateIngredients();
+  await loadAndPopulateIngredients(); // Load ingredients and populate the menu
 
+  const menuUl = document.getElementById('myMenu');
+  const searchInput = document.getElementById('mySearch');
+
+  // Initially hide the menu if the search bar is empty
+  if (searchInput.value.trim() === "") {
+    menuUl.style.display = "none";
+  }
+
+  // Add event listeners after ingredients are loaded
   const menuItems = document.querySelectorAll('#myMenu li a');
   menuItems.forEach(function(item) {
     item.addEventListener('click', function(event) {
-      event.preventDefault();
-      this.classList.toggle('selected');
-      updateSelectedIngredientsDisplay();
+      event.preventDefault(); // Prevent default link action
+      this.classList.toggle('selected'); // Toggle the 'selected' class on the clicked item
+      updateSelectedIngredientsDisplay(); // Update the display of selected ingredients
     });
   });
 
-  updateSelectedIngredientsDisplay();
+  updateSelectedIngredientsDisplay(); // Set up the selected ingredients display initially (e.g., "No ingredients selected")
 });
 
+// selectIngredients function (if used elsewhere, otherwise it can be removed)
 function selectIngredients() {
     updateSelectedIngredientsDisplay();
 }
