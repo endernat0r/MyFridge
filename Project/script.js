@@ -14,10 +14,16 @@ function myFunction() {
   }
 
   li = ul.getElementsByTagName("li");
+  let visibleCount = 0; // Counter for visible items
   for (i = 0; i < li.length; i++) {
     a = li[i].getElementsByTagName("a")[0];
     if (a.innerHTML.toUpperCase().indexOf(filter) > -1) {
-      li[i].style.display = "";
+      if (visibleCount < 10) { // Only display if less than 10 items are already visible
+        li[i].style.display = "";
+        visibleCount++;
+      } else {
+        li[i].style.display = "none"; // Hide if 10 items are already shown
+      }
     } else {
       li[i].style.display = "none";
     }
