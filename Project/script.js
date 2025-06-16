@@ -4,6 +4,8 @@ function myFunction() {
   filter = input.value.toUpperCase(); // Keep the filter text for startsWith check
   ul = document.getElementById("myMenu");
 
+  if (!ul) return; // Guard clause
+
   if (input.value.trim() === "") {
     ul.style.display = "none";
     return;
@@ -61,9 +63,13 @@ function myFunction() {
 function updateSelectedIngredientsDisplay() {
     const selectedItems = document.querySelectorAll('#myMenu li a.selected');
     const selectedIngredientsDiv = document.getElementById('selectedIngredients');
+    const readyBtn = document.getElementById('readyBtn'); // Get the ready button
+    const requirementMsg = document.getElementById('ingredientRequirementMsg'); // Get the message element
+    const recipeResultsUl = document.getElementById('recipeResults');
 
-    if (!selectedIngredientsDiv) {
-        console.error("Element with ID 'selectedIngredients' not found.");
+
+    if (!selectedIngredientsDiv || !readyBtn || !requirementMsg) { // Check all required elements
+        console.error("One or more required elements for ingredient display/recipe action are missing.");
         return;
     }
     selectedIngredientsDiv.innerHTML = ''; // Clear previous content
@@ -72,10 +78,8 @@ function updateSelectedIngredientsDisplay() {
         selectedItems.forEach(item => {
             const ingredientBlock = document.createElement('span');
             ingredientBlock.textContent = item.textContent;
-            // Styles are in styles.css, but you can add specific JS styles if needed
-            // Example: ingredientBlock.classList.add('selected-ingredient-chip');
+            ingredientBlock.classList.add('ingredient-chip'); // Apply CSS class for styling
             
-            // Optional: remove selection when the block is clicked
             ingredientBlock.onclick = function() {
                 item.classList.remove('selected'); // Deselect from the list
                 updateSelectedIngredientsDisplay(); // Re-render the selected ingredients display
@@ -84,6 +88,22 @@ function updateSelectedIngredientsDisplay() {
         });
     } else {
         selectedIngredientsDiv.textContent = 'No ingredients selected';
+    }
+
+    // Handle "Ready" button state and message
+    const minIngredients = 10;
+    if (selectedItems.length >= minIngredients) {
+        readyBtn.disabled = false;
+        if(requirementMsg) requirementMsg.style.display = 'none'; // Hide message
+    } else {
+        readyBtn.disabled = true;
+        if(requirementMsg) {
+            requirementMsg.textContent = `Select at least ${minIngredients} ingredients to find recipes. (${selectedItems.length}/${minIngredients})`;
+            requirementMsg.style.display = 'block'; // Show message
+        }
+        if (recipeResultsUl) {
+            recipeResultsUl.innerHTML = ''; // Clear previous recipe results if count drops below min
+        }
     }
 } 
 
@@ -98,7 +118,7 @@ async function loadAndPopulateIngredients() {
   }
 
   try {
-    const response = await fetch(ingredientsFilePath); // Corrected line
+    const response = await fetch(ingredientsFilePath);
     if (!response.ok) {
       throw new Error(`HTTP error! Status: ${response.status}, file: ${ingredientsFilePath}`);
     }
@@ -200,8 +220,10 @@ async function findAndDisplayRecipes() {
     }
     recipeResultsUl.innerHTML = '<li>Loading recipes...</li>';
 
-    if (selectedIngredients.length === 0) {
-        recipeResultsUl.innerHTML = '<li>Please select some ingredients first.</li>';
+    // This check is now primarily handled by the button's disabled state,
+    // but good as a safeguard if the function is called directly.
+    if (selectedIngredients.length < 10) { 
+        recipeResultsUl.innerHTML = '<li>Please select at least 10 ingredients.</li>';
         return;
     }
 
@@ -219,7 +241,7 @@ async function findAndDisplayRecipes() {
     });
 
     if (possibleRecipes.length === 0) {
-        recipeResultsUl.innerHTML = '<li>No recipes found with the selected ingredients.</li>';
+        recipeResultsUl.innerHTML = '<li>No recipes found that can be made with all selected ingredients.</li>';
         return;
     }
 
@@ -227,11 +249,15 @@ async function findAndDisplayRecipes() {
     const recipesToShow = shuffledRecipes.slice(0, 5);
 
     recipeResultsUl.innerHTML = '';
-    recipesToShow.forEach(recipe => {
-        const li = document.createElement('li');
-        li.textContent = recipe.title;
-        recipeResultsUl.appendChild(li);
-    });
+    if (recipesToShow.length > 0) {
+        recipesToShow.forEach(recipe => {
+            const li = document.createElement('li');
+            li.textContent = recipe.title;
+            recipeResultsUl.appendChild(li);
+        });
+    } else {
+        recipeResultsUl.innerHTML = '<li>No recipes found with the selected ingredients.</li>';
+    }
 }
 
 
@@ -240,31 +266,29 @@ document.addEventListener('DOMContentLoaded', async function() {
 
   const menuUl = document.getElementById('myMenu');
   const searchInput = document.getElementById('mySearch');
+  const readyBtn = document.getElementById('readyBtn'); // Get the ready button
 
   if (searchInput && menuUl && searchInput.value.trim() === "") {
     menuUl.style.display = "none";
   }
 
-  // Event delegation for dynamically added list items
   if (menuUl) {
     menuUl.addEventListener('click', function(event) {
       if (event.target && event.target.nodeName === "A") {
         event.preventDefault();
         event.target.classList.toggle('selected');
-        updateSelectedIngredientsDisplay();
+        updateSelectedIngredientsDisplay(); // This will now update the button state
       }
     });
   } else {
       console.error("Menu UL not found for attaching click listener.");
   }
   
-  updateSelectedIngredientsDisplay(); // Initial call to set up the display
+  updateSelectedIngredientsDisplay(); // Initial call to set up the display and button state
 
-  const showRecipesBtn = document.getElementById('showRecipesBtn');
-  if (showRecipesBtn) {
-    showRecipesBtn.addEventListener('click', findAndDisplayRecipes);
+  if (readyBtn) { // Attach listener to the ready button
+    readyBtn.addEventListener('click', findAndDisplayRecipes);
   } else {
-    // If you don't have this button in your current HTML, this is fine.
-    // console.log("Show Recipes Button not found (this might be intentional).");
+    console.error("Ready button (id='readyBtn') not found!");
   }
 });

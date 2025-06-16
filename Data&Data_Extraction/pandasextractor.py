@@ -11,47 +11,48 @@ data["ingredients"] = data["NER"].apply(ast.literal_eval)
 
 all_ingredients_from_csv = [ingredient for sublist in data["ingredients"] for ingredient in sublist]
 
-# Step 1: Initial cleaning (symbols, lowercase, strip, short words)
+# Step 1: Initial cleaning (symbols, lowercase, strip, http check, short words, consecutive letters)
 processed_ingredients_list = []
 for ingredient in all_ingredients_from_csv:
-    cleaned_ingredient = re.sub(r'[^\w\s]', '', str(ingredient))
-    cleaned_ingredient = cleaned_ingredient.lower().strip()
+    # Convert to string and lowercase first for the http check
+    original_ingredient_str = str(ingredient).lower()
+
+    # Check for "http"
+    if "http" in original_ingredient_str:
+        continue # Skip this ingredient entirely
+
+    # Remove symbols, and strip whitespace (lowercase already done)
+    cleaned_ingredient = re.sub(r'[^\w\s]', '', original_ingredient_str) # original_ingredient_str is already lowercase
+    cleaned_ingredient = cleaned_ingredient.strip()
+
 
     if cleaned_ingredient:
+        # Split into words, remove short words, then rejoin
         words = cleaned_ingredient.split()
         meaningful_words = [word for word in words if len(word) > 2]
-        final_ingredient_after_short_word_removal = " ".join(meaningful_words).strip()
+        ingredient_after_short_word_removal = " ".join(meaningful_words).strip()
         
-        if final_ingredient_after_short_word_removal:
-            processed_ingredients_list.append(final_ingredient_after_short_word_removal)
+        if ingredient_after_short_word_removal:
+            ingredient_after_consecutive_reduction = re.sub(r'(.)\1\1+', r'\1\1', ingredient_after_short_word_removal)
+            
+            if ingredient_after_consecutive_reduction:
+                processed_ingredients_list.append(ingredient_after_consecutive_reduction)
 
-# Step 2: Plural handling and final deduplication
-# Get a set of unique ingredients after the initial processing
 initial_unique_set = set(processed_ingredients_list)
 final_preferred_ingredients_set = set()
 
-for item in initial_unique_set: # Iterate over each unique cleaned item
+for item in initial_unique_set: 
     if item.endswith('s'):
-        # This item is potentially a plural form
         singular_form_candidate = item[:-1]
         if singular_form_candidate in initial_unique_set:
-            # Both the item (e.g., "apples") and its singular form (e.g., "apple")
-            # exist in the cleaned set. Prefer the plural form.
             final_preferred_ingredients_set.add(item)
         else:
-            # Only this plural form (e.g., "apples" without "apple", or "molasses") exists. Keep it.
             final_preferred_ingredients_set.add(item)
     else:
-        # This item is a singular form (does not end with 's')
         potential_plural_form = item + "s"
         if potential_plural_form not in initial_unique_set:
-            # This singular item exists, and its corresponding plural form does NOT exist. Keep the singular.
             final_preferred_ingredients_set.add(item)
-        # Else (the singular item's plural form DOES exist in initial_unique_set):
-            # The plural form would have been added when it was processed.
-            # So, we do nothing here for this singular item, effectively discarding it in favor of its plural.
-
-# Convert the final set to a sorted list for consistent output
+       
 unique_ingredients = sorted(list(final_preferred_ingredients_set))
 
 print(f"Found {len(unique_ingredients)} unique ingredients after all processing.")

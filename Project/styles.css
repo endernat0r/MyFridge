@@ -1,7 +1,7 @@
 body {
     margin: 0;
     padding: 0;
-    font: arial, sans-serif;
+    font-family: Arial, sans-serif; /* Corrected font property */
 }
 
 .header {
@@ -35,19 +35,20 @@ body {
   margin-left: auto;
   margin-right: auto;
   display: block;
+  box-sizing: border-box; /* Ensures padding doesn't add to width */
 }
 
 #myMenu {
   list-style-type: none;
   padding: 0;
-  margin: 0;
-  width: 51.4%;
-  margin-left: auto;
-  margin-right: auto;
+  margin: 0 auto; /* Simplified margin for centering */
+  width: 50%; /* Match search bar width */
   display: block;
   max-height: 300px;
   overflow-y: auto;
   border: 1px solid #ddd;
+  border-top: none; /* Avoid double border with search */
+  box-sizing: border-box;
 }
 
 #myMenu li a {
@@ -55,14 +56,117 @@ body {
   text-decoration: none;
   color: black;
   display: block;
-  border: 1px solid #929090;
+  border-bottom: 1px solid #eee; /* Lighter border between items */
+}
+
+#myMenu li:last-child a {
+    border-bottom: none; /* No border for the last item */
 }
 
 #myMenu li a:hover {
-  background-color: #b7b7b7;
+  background-color: #f0f0f0; /* Lighter hover */
 }
 
 #myMenu li a.selected {
   background-color: #4CAF50;
   color: white;
+}
+
+#selectedIngredientsContainer {
+    text-align: center;
+    margin-top: 20px;
+    padding: 0 10%; /* Add some horizontal padding */
+}
+
+#selectedIngredients {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px; /* Spacing between chips */
+    padding: 10px 0;
+    min-height: 30px; /* Ensure it has some height even when empty */
+}
+
+/* Style for individual selected ingredient chips */
+.ingredient-chip {
+  display: inline-block;
+  padding: 6px 12px;
+  margin: 4px;
+  border: 1px solid #4CAF50;
+  border-radius: 16px;
+  background-color: #e8f5e9;
+  color: #2e7d32;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s;
+}
+
+.ingredient-chip:hover {
+    background-color: #d4eed8;
+}
+
+
+#recipeActionArea {
+    text-align: center;
+    margin-top: 20px;
+    padding: 10px;
+}
+
+#ingredientRequirementMsg {
+    color: #777;
+    font-size: 0.9em;
+    margin-bottom: 10px;
+}
+
+#readyBtn {
+    background-color: #007bff;
+    color: white;
+    padding: 12px 25px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.2s;
+}
+
+#readyBtn:hover:not(:disabled) {
+    background-color: #0056b3;
+}
+
+#readyBtn:disabled {
+    background-color: #cccccc;
+    color: #666666;
+    cursor: not-allowed;
+}
+
+#recipeResultsArea {
+    text-align: left; /* Align recipe text to the left for readability */
+    width: 60%; /* Or your preferred width */
+    margin: 30px auto; /* Center it and add top/bottom margin */
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+}
+
+#recipeResultsArea h3 {
+    margin-top: 0;
+    color: #333;
+    text-align: center; /* Center the heading */
+}
+
+#recipeResults {
+    list-style-type: disc; /* Use standard bullets for recipes */
+    padding-left: 20px; /* Indent recipe list */
+    margin: 0;
+}
+
+#recipeResults li {
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
+    color: #555;
+}
+
+#recipeResults li:last-child {
+    border-bottom: none;
 }

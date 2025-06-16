@@ -16,14 +16,30 @@
     <div>
         <input type="text" id="mySearch" onkeyup="myFunction()" placeholder="Search.." title="Type in a category">
         <ul id="myMenu">
-
+            <!-- Ingredients will be populated here by script.js -->
         </ul>
     </div>
+
     <div id="selectedIngredientsContainer" style="text-align: center; margin-top: 20px;">
         <h2>Selected Ingredients:</h2>
-        <div id="selectedIngredients" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 5px;">
+        <div id="selectedIngredients">
+            <!-- Selected ingredient chips will be displayed here -->
+            No ingredients selected
         </div>
     </div>
+
+    <div id="recipeActionArea">
+        <p id="ingredientRequirementMsg">Select at least 10 ingredients to find recipes.</p>
+        <button id="readyBtn" disabled>Ready</button>
+    </div>
+
+    <div id="recipeResultsArea">
+        <h3>Suggested Recipes:</h3>
+        <ul id="recipeResults">
+            <!-- Recipe results will be displayed here -->
+        </ul>
+    </div>
+
     <script src="script.js"></script>
 </body>
 </html>
